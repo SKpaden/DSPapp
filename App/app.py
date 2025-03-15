@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # Load data:
-df = pd.read_csv("data\\cleaned_BFL_data.csv")
+df = pd.read_csv("data/cleaned_BFL_data.csv")
 df['date'] = pd.to_datetime(df['date'])
 
 app = Dash(__name__)
