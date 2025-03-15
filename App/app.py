@@ -32,6 +32,6 @@ app.layout = html.Div(
     Input("dropdown", "value")
 )
 def update_graph(selected_column):
-    return px.line(df, x="date", y=selected_column, title=f"Line Chart of {selected_column}")
+    return px.scatter(df, x="date", y=selected_column, title=f"Line Chart of {selected_column}")
 
 server = app.server  # Expose the server for Render
