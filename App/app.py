@@ -18,8 +18,11 @@ app.layout = html.Div(
             options=[
             {"label": ['skydives', 'base_jumps'], "value": ['skydives', 'base_jumps']}
         ],
-        value=df.columns[1]
-        )
+        value="skydives"
+        ),
+
+        # Graph to display the results
+        dcc.Graph(id="dynamic_graph")
     ],
     style={"padding": "20px"}
 )
