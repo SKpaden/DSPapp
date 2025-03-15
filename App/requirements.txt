@@ -2,3 +2,4 @@ dash
 gunicorn
 flask
 pandas
+plotly.express
