@@ -1,17 +1,65 @@
 body {
-    background-color: #f4f4f42c;
+    background-color: #1b1b1b;
     font-family: Arial, sans-serif;
 }
 h1 {
-    color: teal;
+    color: rgb(255, 255, 255);
+}
+h3 {
+    color: rgb(255, 255, 255);
+}
+p {
+    color: rgb(255, 255, 255);
+}
+input {
+    background-color: #4b4949;
+    color:rgb(255, 255, 255)
 }
 button {
-    background-color: #4caf50;
+    background-color: #4e0000;
     color: white;
-    border: none;
+    border: solid;
+    border-color: #4b4949;
     padding: 10px 20px;
     cursor: pointer;
+    border-radius: 5%;
 }
 button:hover {
-    background-color: #45a049;
+    background-color: #690009;
+}
+div.Select-value {
+    background-color: #4b4949;
+    border-style: solid;
+    border-radius: 5%;
+}
+span.Select-value-label {
+    color:aliceblue !important;
+}
+
+.custom-tab {
+    background-color: #3a3a3a !important;
+    color: darkgrey !important; 
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    
+}
+
+.custom-tab--selected {
+    background-color: #4b4949 !important;
+    color: white !important;
+    font-weight: bold !important;
+    border-color: darkgrey !important;
+    border-radius: 5px;
+}
+
+.custom-tab--selected:hover {
+    background-color: #4b4949 !important;
+    color: white !important;
+}
+
+.custom-tab:hover {
+    background-color: darkgrey !important;
+    color: white !important;
+    font-weight: bold;
 }
