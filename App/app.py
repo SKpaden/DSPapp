@@ -2,6 +2,36 @@ from dash import Dash, html, dcc, Input, Output
 import pandas as pd
 import plotly.express as px
 
+
+def init_stacked_bar():
+    # Find the top 5 most frequent locations:
+    top_locations = df['location'].value_counts().nlargest(5).index
+
+    # Replace locations not in the top 5 with "Other":
+    df['filtered_location'] = df['location'].apply(lambda x: x if x in top_locations else 'Other')
+
+    # Group data by cause_of_death and filtered_location:
+    grouped_data = df.groupby(['cause_of_death', 'filtered_location']).size().reset_index(name='number_of_fatal_accidents')
+
+    # Sort the DataFrame by the total number of fatal accidents:
+    sorted_data = grouped_data.groupby('cause_of_death')['number_of_fatal_accidents'].sum().sort_values(ascending=False)
+
+    # Use the sorted order to reindex your DataFrame:
+    grouped_data['cause_of_death'] = pd.Categorical(
+        grouped_data['cause_of_death'],
+        categories=sorted_data.index,
+        ordered=True
+    )
+
+    # Pivot the data for stacked bar plotting:
+    pivot_data = grouped_data.pivot(index='cause_of_death', columns='filtered_location', values='number_of_fatal_accidents')
+
+    return px.bar(pivot_data, title ="Stacked Bar Chart of Causes of Death for Top Countries", height=800).update_layout(
+                                template='plotly_dark',
+                                plot_bgcolor='rgba(0, 0, 0, 0)',
+                                paper_bgcolor='rgba(0, 0, 0, 0)',
+                            )
+
 # Load data:
 df = pd.read_csv("data/cleaned_BFL_data.csv")
 df['date'] = pd.to_datetime(df['date'])
@@ -20,6 +50,8 @@ test_fig2 = px.bar(df.groupby(by='age').size(),title="Bar Plot for Number of Bas
                                 plot_bgcolor='rgba(0, 0, 0, 0)',
                                 paper_bgcolor='rgba(0, 0, 0, 0)',
                             )
+
+stacked_bar = init_stacked_bar()
 
 app = Dash(__name__)
 app.layout = html.Div(
@@ -49,7 +81,11 @@ app.layout = html.Div(
             #dcc.Graph(figure=test_fig2),
             dcc.Graph(id="graph-3")  # dynamic bar plot
 
-        ])
+        ]),
+        dcc.Loading(id="loading-3",
+                    type="circle",
+                    children=dcc.Graph(figure=stacked_bar)
+                    )
     ],
     style={"padding": "20px"}
 )
