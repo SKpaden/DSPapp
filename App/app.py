@@ -8,6 +8,7 @@ df['date'] = pd.to_datetime(df['date'])
 df['year'] = df['date'].dt.year
 
 grouped_year = df.groupby(by='year').size()
+
 test_fig = px.line(grouped_year,title="Line Plot for Number of Base Fatalities per Year").update_layout(
                                 template='plotly_dark',
                                 plot_bgcolor='rgba(0, 0, 0, 0)',
@@ -32,15 +33,25 @@ app.layout = html.Div(
         dcc.Tab(label="Tab 2: Bar Plot", value="tab-2", className="custom-tab", selected_className="custom-tab--selected"),
     ]),
         html.Div(id="tab-content"),  # content of the currently selected tab
-        dcc.Graph(figure=test_fig),
-        dcc.Graph(figure=test_fig2)
+        dcc.Graph(figure=test_fig),  # static graph
+        # Container for another dropdown and plot:
+        html.Div([
+            dcc.Dropdown(
+                id="dropdown-3",
+                options=[
+                    {"label": "Per Country", "value": "country"},
+                    {"label": "Per Location", "value": "location"},
+                    {"label": "Per Age", "value": "age"}
+                ],
+                value="age",  # default selection
+                style={"width": "50%"}
+            ),
+            #dcc.Graph(figure=test_fig2),
+            dcc.Graph(id="graph-3")  # dynamic bar plot
+
+        ])
     ],
     style={"padding": "20px"}
-)
-
-@app.callback(
-    Output("dynamic_graph", "figure"),
-    Input("dropdown", "value")
 )
 
 # Callback to render content for each tab
@@ -109,6 +120,18 @@ def update_graph_2(selected_column):
                                 template='plotly_dark',
                                 plot_bgcolor='rgba(0, 0, 0, 0)',
                                 paper_bgcolor='rgba(0, 0, 0, 0)', 
+                            )
+
+# Callback for the dynamic bar plot in Tab 2:
+@app.callback(
+    Output("graph-3", "figure"),
+    Input("dropdown-3", "value")
+)
+def update_graph_3(selected_column):
+    return px.bar(df.groupby(by=selected_column).size().sort_values(ascending=False),height=800, title=f"Bar Plot for Number of Accidents per {selected_column}").update_layout(
+                                template='plotly_dark',
+                                plot_bgcolor='rgba(0, 0, 0, 0)',
+                                paper_bgcolor='rgba(0, 0, 0, 0)'
                             )
 
 if __name__ == "__main__":
