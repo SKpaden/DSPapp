@@ -5,7 +5,13 @@ body {
 h1 {
     color: rgb(255, 255, 255);
 }
+h2 {
+    color: rgb(255, 255, 255);
+}
 h3 {
+    color: rgb(255, 255, 255);
+}
+h4 {
     color: rgb(255, 255, 255);
 }
 p {
@@ -27,6 +33,14 @@ button {
 button:hover {
     background-color: #690009;
 }
+
+/* Styles for disabled buttons */
+button:disabled {
+    background-color: #cccccc; /* Gray when disabled */
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 div.Select-value {
     background-color: #4b4949;
     border-style: solid;
@@ -37,16 +51,15 @@ span.Select-value-label {
 }
 
 .custom-tab {
-    background-color: #3a3a3a !important;
+    background-color: #3a3a3a !important; /* does not work without !important */
     color: darkgrey !important; 
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
-    
 }
 
 .custom-tab--selected {
-    background-color: #4b4949 !important;
+    background-color: #4b4949 !important; /* does not work without !important */
     color: white !important;
     font-weight: bold !important;
     border-color: darkgrey !important;
@@ -62,4 +75,16 @@ span.Select-value-label {
     background-color: darkgrey !important;
     color: white !important;
     font-weight: bold;
+}
+
+#description {
+    color: white;
+}
+
+#just-line-break {
+    white-space: pre-line;
+}
+  
+#line-break-and-tab {
+    white-space: pre-wrap;
 }

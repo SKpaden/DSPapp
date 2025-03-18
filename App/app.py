@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, Input, Output
+from dash import Dash, html, dcc, Input, Output, State, callback_context
 import pandas as pd
 import plotly.express as px
 
@@ -36,6 +36,23 @@ def init_stacked_bar():
 df = pd.read_csv("data/cleaned_BFL_data.csv")
 df['date'] = pd.to_datetime(df['date'])
 df['year'] = df['date'].dt.year
+df['description'] = df['description'].fillna('')  # for distinguishing empty descr
+
+# Reduce to only unique values:
+factor_list = df['possible_factors'].unique().tolist()
+i = 0
+while i < len(factor_list):  # while loop, because list size expands dynamically
+    factor_list[i:i+1] = factor_list[i].split(', ')  # insert new list into list
+    i+=1
+factor_list = set(factor_list)  # remove duplicates
+
+temp_df = df.copy(deep=True)  # copy df to not change original df
+
+# Split the comma-separated values into lists:
+temp_df["possible_factors"] = temp_df["possible_factors"].str.split(", ")
+
+# Explode the list into individual rows:
+df_exploded = temp_df.explode("possible_factors")
 
 grouped_year = df.groupby(by='year').size()
 
@@ -53,6 +70,7 @@ test_fig2 = px.bar(df.groupby(by='age').size(),title="Bar Plot for Number of Bas
 
 stacked_bar = init_stacked_bar()
 
+# Layout:
 app = Dash(__name__)
 app.layout = html.Div(
     children=[
@@ -85,12 +103,109 @@ app.layout = html.Div(
         dcc.Loading(id="loading-3",
                     type="circle",
                     children=dcc.Graph(figure=stacked_bar)
-                    )
+                    ),
+
+        # Header for word cloud:
+        html.H1("What Factors Are Most Prominent in Base Fatalities?", style={"textAlign": "center"}),
+
+        # Wordcloud image:
+        html.Div([
+            html.Img(src="/assets/wordcloud.png", style={"width": "60%", "height": "auto", "align": "center"})
+        ], style={'textAlign': 'center'}
+        ),
+
+        # Disclaimer text:
+        html.Div(children=[
+            html.H2("Disclaimer"),
+            html.H3("These are incident descriptions from the Base Fatality List (BFL)."
+            " Some contain detailed reports of what happened and led to the accident, some contain emotional words from family or friends."
+            " We shall learn from their mistakes to prevent more accidents in the future.")
+        ], style={"textAlign": "center", "white-space": "pre-wrap"}
+        ),
+
+        # Explanation for dropdown:
+        html.H4("Choose a possible factor to browse reports for:", style={"textAlign": "left"}),
+
+        # Factor selector:
+        dcc.Dropdown(
+            id="factor-dropdown",
+            options=[{"label": factor, "value": factor} for factor in factor_list],
+            value="Canopy Entanglement",  # default selected value
+            style={"width": "50%"},
+            className="large-dropdown"  # custom class for styling
+        ),
+
+        # Container for victims name:
+        html.H3(id="BFL-victim-name", style={"fontSize": "18px",
+                                            "padding": "20px",
+                                            "textAlign": "center"
+                                            }),
+
+        # Paragraph for incident description:
+        html.Div(id="description", style={"white-space": "pre-wrap",  # convert \n to actual line break (html)
+                                          "fontSize": "18px",
+                                          "padding": "20px",
+                                          "textAlign": "left"
+                                          }),
+
+        # Buttons to get next and previous incident description/report:
+        html.Button("Previous", id="prev-button", disabled=True),  # initially disabled
+        html.Button("Next", id="next-button"),
+
+        # Hidden component to store the current index:
+        dcc.Store(id="current-index", data=0)
+
     ],
     style={"padding": "20px"}
 )
 
-# Callback to render content for each tab
+# Combined callback
+@app.callback(
+    [Output("current-index", "data"),
+     Output("prev-button", "disabled"),
+     Output("next-button", "disabled"),
+     Output("description", "children"),
+     Output("BFL-victim-name", "children")],
+    [Input("factor-dropdown", "value"),
+     Input("prev-button", "n_clicks"),
+     Input("next-button", "n_clicks")],
+    State("current-index", "data")
+)
+def reset_index_on_factor_change(selected_factor, prev_clicks, next_clicks, current_index):
+    # Reset the index to 0 and update description:
+    data = df_exploded.query(f'possible_factors == "{selected_factor}"')
+    data = data.query("description != ''")
+
+    # Get the triggered input ("next", "previous" or "dropdown"):
+    triggered_id = callback_context.triggered[0]["prop_id"].split(".")[0]
+    #print(callback_context.triggered[0])
+
+    # Reset index to 0 if the dropdown changes:
+    if triggered_id == "factor-dropdown":
+        current_index = 0
+
+    # Navigate with buttons
+    elif triggered_id == "prev-button" and current_index > 0:
+        current_index -= 1
+    elif triggered_id == "next-button" and current_index < len(data) - 1:
+        current_index += 1
+    
+    # Get the current description
+    description = data.iloc[current_index]['description'] if not data.empty else "No incidents available."
+    if description == "":  # If it's a Pandas Series
+            description = "No description available for this incident."
+
+    name = "In Memory of "
+    name += data.iloc[current_index]['name']
+    
+    # Enable/disable buttons based on boundaries
+    prev_disabled = current_index == 0
+    next_disabled = current_index == len(data) - 1
+
+    return current_index, prev_disabled, next_disabled, description, name
+
+
+# Callback to render content for each tab:
 @app.callback(
     Output("tab-content", "children"),
     Input("tabs", "value")
