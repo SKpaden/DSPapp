@@ -45,6 +45,8 @@ while i < len(factor_list):  # while loop, because list size expands dynamically
     factor_list[i:i+1] = factor_list[i].split(', ')  # insert new list into list
     i+=1
 factor_list = set(factor_list)  # remove duplicates
+factor_list = list(factor_list)
+factor_list.sort()
 
 temp_df = df.copy(deep=True)  # copy df to not change original df
 

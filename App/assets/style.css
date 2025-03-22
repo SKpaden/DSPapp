@@ -50,6 +50,7 @@ span.Select-value-label {
     color:aliceblue !important;
 }
 
+/* For tabs */
 .custom-tab {
     background-color: #3a3a3a !important; /* does not work without !important */
     color: darkgrey !important; 
@@ -87,4 +88,8 @@ span.Select-value-label {
   
 #line-break-and-tab {
     white-space: pre-wrap;
+}
+
+label {
+    color: white;
 }
