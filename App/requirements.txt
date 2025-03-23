@@ -5,4 +5,4 @@ pandas
 plotly.express
 dash_dangerously_set_inner_html
 scipy
-statsmodels.api
+statsmodels
