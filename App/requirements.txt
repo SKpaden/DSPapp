@@ -4,5 +4,5 @@ flask
 pandas
 plotly.express
 dash_dangerously_set_inner_html
-scipy.stats
+scipy
 statsmodels.api
